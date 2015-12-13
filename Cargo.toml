@@ -1,0 +1,7 @@
+[package]
+name = "rah-dom-sdl"
+version = "0.1.0"
+authors = ["Jaden Carver <jaden.carver@gmail.com>"]
+
+[dependencies]
+sdl2 = "*"
