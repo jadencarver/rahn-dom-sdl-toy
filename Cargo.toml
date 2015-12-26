@@ -6,3 +6,4 @@ authors = ["Jaden Carver <jaden.carver@gmail.com>"]
 [dependencies]
 sdl2 = "*"
 rand = "*"
+sdl2_image = "*"
