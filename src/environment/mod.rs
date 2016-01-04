@@ -1,49 +1,89 @@
 use std::f32::consts::PI;
 use rand;
 
+// fn split_owned_vec<T>(mut v: ~[T], index: uint) -> (~[T], ~[T]) {
+//     assert!(index <= v.len());
+
+//     let new_len = v.len() - index;
+//     let mut new_v = vec::with_capacity(v.len() - index);
+//     unsafe {
+//         ptr::copy_nonoverlapping_memory(new_v.as_mut_ptr(), v.as_ptr().offset(index as int), new_len);
+//         v.set_len(index);
+//         new_v.set_len(new_len);
+//     }
+
+//     (v, new_v)
+// }
+
 pub struct Environment {
-  pub particles: Vec<Particle>
+  pub particles: Vec<Particle>,
+  pub dead_particles: Vec<Particle>,
 }
 
 impl Environment {
 
+  pub fn new() -> Environment {
+    Environment { particles: vec![], dead_particles: vec![] }
+  }
+
   pub fn generate_particles(&mut self) {
     for i in 0..72 {
       let f = (i * 5) as f32;
-      let mut p = Particle { d: f * (PI/180.0), ..Default::default() };
+      let mut p = Particle::new(f * (PI/180.0));
       p.generate();
       self.particles.push(p);
     }
   }
 
   pub fn tick(&mut self) {
+
+    // ------ reproduce a random particle
+    // let mut new_particle = None;
+    // {
+    //   let len = self.particles.len();
+    //   let random_i = rand::random::<usize>() % len;
+    //   let random_particle = self.particles.get(random_i).unwrap();
+    //   if !random_particle.dead {
+    //     new_particle = Some(Particle {
+    //       x: random_particle.x,
+    //       y: random_particle.y,
+    //       d: random_particle.d,
+    //       v: random_particle.v,
+    //       ..Default::default()
+    //     });
+    //   }
+    // }
+    // match new_particle {
+    //   Some(particle) => { self.particles.push(particle) }
+    //   None => {}
+    // }
+
+    // ------ random particle distance
     // let len = self.particles.len();
     // let random_i = rand::random::<usize>() % len;
-    // let particles = self.particles;
-    // let random_particle = self.particles.get_mut(random_i).unwrap();
+    // let random_particle = self.particles.get(random_i).unwrap();
     // for particle in self.particles.iter_mut() {
     //   match particle.neighbor {
-    //     Some(neighbor_i) => {
+    //     Some(neighbor) => {
     //       let a = particle.x - random_particle.x;
     //       let b = particle.y - random_particle.y;
     //       let random_distance = (a.powi(2)+b.powi(2)).sqrt();
-    //       let neighbor = self.particles.get(neighbor_i).unwrap();
     //       let a = particle.x - neighbor.x;
     //       let b = particle.y - neighbor.y;
     //       let neighbor_distance = (a.powi(2)+b.powi(2)).sqrt();
     //       if neighbor_distance > random_distance {
-    //         particle.neighbor = Some(random_i);
+    //         particle.neighbor = Some(&random_particle);
     //       }
     //     }
     //     None => {
-    //       particle.neighbor = Some(random_i);
+    //       particle.neighbor = Some(&random_particle);
     //     }
     //   }
     // }
-    for mut particle in self.particles.iter_mut() {
-      particle.tock();
-      if particle.e < 0.1 { particle.dead = true; }
-    }
+    // let particles = &mut self.particles;
+    for mut particle in self.particles.iter_mut() { particle.tock() };
+    // let (dead, live): (Vec<Particle>, Vec<Particle>) = self.particles.into_iter().partition(|p: &Particle| p.dead);
+    // return self
   }
 
 }
@@ -59,39 +99,38 @@ pub struct Particle {
   pub cp: usize
 }
 
-impl Default for Particle {
-  fn default () -> Particle {
+impl Particle {
+
+  pub fn new (d: f32) -> Particle {
     Particle {
       x : 400.0,
       y : 300.0,
-      d : 0.0,
-      v : 5.0,
+      d : d,
+      v : 2.0,
       e : 10.0,
       dna: vec!(0),
       cp : 0,
       dead: false
     }
   }
-}
-
-impl Particle {
 
   fn tock(&mut self) {
     self.x += self.d.cos() * self.v;
     self.y += self.d.sin() * self.v;
-    if self.x > 784.0 || self.x < 0.0 {
+    if self.x > 752.0 || self.x < 0.0 {
       self.d = PI - self.d;
-      self.v += self.v.sqrt();
+      self.v += 0.5;
       self.e -= 0.5;
     }
-    if self.y > 568.0 || self.y < 0.0 {
+    if self.y > 552.0 || self.y < 0.0 {
       self.d = self.d * -1.0;
-      self.v += self.v.sqrt();
+      self.v += 0.5;
       self.e -= 0.5;
     }
     self.v *= 0.99;
-    if !self.dead { self.transcriptase() }
-    self.d = self.d % 52.0;
+    if !self.dead && self.e < 0.1 { self.dead = true }
+    if !self.dead { self.transcriptase() };
+    self.d = self.d % 6.283185308;
   }
 
   fn generate(&mut self) {

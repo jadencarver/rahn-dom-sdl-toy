@@ -2,7 +2,8 @@ extern crate rand;
 extern crate sdl2;
 extern crate sdl2_image;
 
-use sdl2::pixels::{Color, PixelFormatEnum};
+use std::fmt::Debug;
+use sdl2::pixels::Color;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use std::path::Path;
@@ -22,20 +23,14 @@ fn main() {
   let window = video_subsystem.window("RAHN DOM", 800, 600)
     .position_centered().opengl()
     .build().unwrap();
-    
+
   let mut event_pump = sdl_context.event_pump().unwrap();
   let mut renderer = window.renderer().present_vsync().build().unwrap();
 
   let live_texture = renderer.load_texture(Path::new("images/bug.png")).unwrap();
   let dead_texture = renderer.load_texture(Path::new("images/bug_dead.png")).unwrap();
 
-  // for i in 0..360 {
-  //   let f = i as f32;
-  //   let r = f * (PI/180.0);
-  //   println!("Angle {} => Radians {} : Sine: {} - Cosine: {}", f, r, r.sin(), r.cos());
-  // }
-
-  let mut env = Environment { particles: vec!() };
+  let mut env = Environment::new();
   env.generate_particles();
 
   'running: loop {
@@ -43,6 +38,9 @@ fn main() {
       match event {
         Event::Quit {..} | Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
           break 'running
+        },
+        Event::KeyDown { keycode: Some(Keycode::Return), .. } => {
+          env.particles.push(environment::Particle::new(rand::random::<f32>() * (2.0*PI)))
         },
         _ => {}
       }
