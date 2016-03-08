@@ -39,9 +39,9 @@ fn main() {
         Event::Quit {..} | Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
           break 'running
         },
-        Event::KeyDown { keycode: Some(Keycode::Return), .. } => {
-          env.particles.push(environment::Particle::new(rand::random::<f32>() * (2.0*PI)))
-        },
+        //Event::KeyDown { keycode: Some(Keycode::Return), .. } => {
+        //  env.particles.push(environment::Particle::new(rand::random::<f32>() * (2.0*PI)))
+        //},
         _ => {}
       }
     };
